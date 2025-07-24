@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const GAMECODELENGTH = 6;
-
 const JoinGame = () => {
   const navigate = useNavigate();
   const [showInput, setShowInput] = useState(false);
@@ -18,7 +17,7 @@ const JoinGame = () => {
   };
 
   const handleSubmit = async () => {
-    const response = await fetch('/api/join-game', {
+    const response = await fetch(`https://dilema.onrender.com/join-game`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code: inputCode, playerID: 2 })

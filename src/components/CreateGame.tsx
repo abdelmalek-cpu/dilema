@@ -26,7 +26,7 @@ const CreateGame = () => {
 
 
   const handleCreate = async () => {
-    const response = await fetch('/api/create-game', {
+    const response = await fetch('https://dilema.onrender.com/create-game', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({})
