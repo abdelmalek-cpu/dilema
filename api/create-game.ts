@@ -1,6 +1,6 @@
-import {games, Game, MAXROUNDS} from './_db';
+import {games, Game, MAXROUNDS} from './_db.js';
 
-export default function handler(req, res) {
+export default function handler(req: any, res: any) {
 
 
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,7 +15,7 @@ export default function handler(req, res) {
 
 
     const gameCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const newGame = {
+    const newGame: Game = {
         code: gameCode,
         players: [{
             id: 1,

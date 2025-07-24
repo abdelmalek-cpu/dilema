@@ -1,4 +1,4 @@
-import { Choice, games, payoff } from './_db';
+import { Choice, games, payoff } from './_db.js';
 
 
 export default function handler(req: any, res: any) {

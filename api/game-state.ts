@@ -1,4 +1,4 @@
-import { games } from './_db';
+import { games } from './_db.js';
 
 
 export default function handler(req: any, res: any) {
