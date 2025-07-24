@@ -164,7 +164,6 @@ const GamePlay = () => {
               marginBottom: 4
             }}
           >
-            {/* your move */}
             <div
               title={yourMove}
               style={{
@@ -175,7 +174,6 @@ const GamePlay = () => {
               }}
             />
 
-            {/* opponent move */}
             <div
               title={oppMove}
               style={{
@@ -186,7 +184,6 @@ const GamePlay = () => {
               }}
             />
 
-            {/* running score */}
             <span style={{ fontSize: '0.9em' }}>
               {yourScore} - {oppScore}
             </span>
