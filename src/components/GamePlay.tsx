@@ -58,7 +58,7 @@ const GamePlay = () => {
         setError(null);
 
         try {
-            const res = await fetch('/api/move', {
+            const res = await fetch(`https://dilema.onrender.com/move`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code, playerID, choice })
