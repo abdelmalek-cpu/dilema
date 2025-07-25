@@ -26,7 +26,7 @@ const CreateGame = () => {
 
 
   const handleCreate = async () => {
-    const response = await fetch('localhost:4000/create-game', {
+    const response = await fetch('http://localhost:4000/create-game', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({})
