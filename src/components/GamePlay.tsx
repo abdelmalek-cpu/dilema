@@ -78,18 +78,22 @@ const GamePlay = () => {
         const [score1, score2] = game.history[game.history.length - 1]?.result ?? [0, 0];
 
         let resultText = 'Its a tie!';
-
+        let winner: 1 | 2 | null = null;
         if (score1 > score2) {
-            resultText = `You win! Final score: ${score1} - ${score2}`;
+            [resultText, winner] = [`You win! Final score: ${score1} - ${score2}`, 1];
         } else if (score2 > score1) {
-            resultText = `You lose! Final score: ${score1} - ${score2}`;
+            [resultText, winner] = [`You lose! Final score: ${score1} - ${score2}`, 2];
         }
 
         return (
             <div>
                 <h2>Game Over</h2>
                 <p>Final Score - Player 1: {score1}, Player 2: {score2}</p>
-                <h3>{resultText}</h3>
+                {
+                  winner  === playerID
+                      ? <p style={{ color: 'green' }}>{resultText}</p>
+                      : <p style={{ color: 'red' }}>{resultText}</p>
+                }
                 <button onClick={() => navigate('/')}>Back to Home</button>
             </div>
         );
