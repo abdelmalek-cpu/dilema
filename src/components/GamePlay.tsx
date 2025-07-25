@@ -79,21 +79,21 @@ const GamePlay = () => {
 
         let resultText = 'Its a tie!';
         let winner: 1 | 2 | null = null;
-        if (score1 > score2) {
-            [resultText, winner] = [`You win! Final score: ${score1} - ${score2}`, 1];
-        } else if (score2 > score1) {
-            [resultText, winner] = [`You lose! Final score: ${score1} - ${score2}`, 2];
+
+        if (me!.score > opponent!.score) {
+            resultText = 'You won!';
+            winner = playerID;
+        } else if (me!.score < opponent!.score) {
+            resultText = 'You lost!';
+            winner = playerID === 1 ? 2 : 1;
         }
 
         return (
             <div>
                 <h2>Game Over</h2>
                 <p>Final Score - Player 1: {score1}, Player 2: {score2}</p>
-                {
-                  winner  === playerID
-                      ? <p style={{ color: 'green' }}>{resultText}</p>
-                      : <p style={{ color: 'red' }}>{resultText}</p>
-                }
+                <p>{resultText}</p>
+                {winner && <p>Winner: Player {winner}</p>}
                 <button onClick={() => navigate('/')}>Back to Home</button>
             </div>
         );
