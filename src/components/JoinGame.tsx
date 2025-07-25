@@ -17,7 +17,7 @@ const JoinGame = () => {
   };
 
   const handleSubmit = async () => {
-    const response = await fetch(`https://dilema.onrender.com/join-game`, {
+    const response = await fetch(`https://dilema-production.up.railway.app/join-game`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code: inputCode, playerID: 2 })

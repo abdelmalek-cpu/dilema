@@ -41,7 +41,7 @@ const GamePlay = () => {
     useEffect(() => {
         const iv = setInterval( async () => {
             try {
-                const res = await fetch(`https://dilema.onrender.com/game-state?code=${code}`);
+                const res = await fetch(`https://dilema-production.up.railway.app/game-state?code=${code}`);
                 const { game: updatedGame } = await res.json();
                 setGame(updatedGame);
                 console.log('Game state updated:', updatedGame);
@@ -58,7 +58,7 @@ const GamePlay = () => {
         setError(null);
 
         try {
-            const res = await fetch(`https://dilema.onrender.com/move`, {
+            const res = await fetch(`https://dilema-production.up.railway.app/move`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code, playerID, choice })
