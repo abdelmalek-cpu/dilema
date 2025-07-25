@@ -93,7 +93,7 @@ const GamePlay = () => {
                 <h2>Game Over</h2>
                 <p>Final Score - Player 1: {score1}, Player 2: {score2}</p>
                 <p>{resultText}</p>
-                {winner && <p>Winner: Player {winner}</p>}
+                {winner && <p style={{ color: winner === playerID ? 'green' : 'red' }}>Winner: Player {winner}</p>}
                 <button onClick={() => navigate('/')}>Back to Home</button>
             </div>
         );
