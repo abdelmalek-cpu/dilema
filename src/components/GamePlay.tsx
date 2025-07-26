@@ -39,7 +39,7 @@ const GamePlay = () => {
         playerID,
       },
     });
-  });
+  }, [game.code, playerID, sendJsonMessage]);
 
   useEffect(() => {
     const message = lastJsonMessage as ServerMessage | null;
