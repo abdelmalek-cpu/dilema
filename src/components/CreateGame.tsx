@@ -4,7 +4,7 @@ import useWebSocket from "react-use-websocket";
 
 const CreateGame = () => {
   const navigate = useNavigate();
-  const WS_URL: string = process.env.WS_URL || "ws://localhost:4001";
+  const WS_URL: string = "ws://localhost:4001";
 
   const { sendJsonMessage } = useWebSocket(WS_URL, {
     onMessage: (event) => {
