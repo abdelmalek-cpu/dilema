@@ -14,7 +14,6 @@ const createGame = (): string => {
   if (games[gameCode]) {
     return createGame();
   }
-  
 
   games[gameCode] = {
     code: gameCode,
@@ -94,7 +93,7 @@ wsServer.on("connection", (connection) => {
           console.log(`Player ${playerID} joined game ${gameCode}`);
           break;
         }
-        default:
+        default: {
           connection.send(
             JSON.stringify({
               type: "error",
@@ -102,6 +101,7 @@ wsServer.on("connection", (connection) => {
             })
           );
           break;
+        }
       }
     } catch {
       console.error("Error processing message: bad request format");
