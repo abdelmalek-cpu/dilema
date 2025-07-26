@@ -185,7 +185,6 @@ wsServer.on("connection", (connection) => {
                   payload: { game: games[gameCode] },
                 })
               );
-              console.log("Game updated");
             }
           }
 
