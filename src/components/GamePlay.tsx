@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import type { Choice, Game } from "../../utilities/types";
 import useWebSocket from "react-use-websocket";
 import { useEffect, useState } from "react";
+import type { ServerMessage } from "../../utilities/messages";
 
 const MOVE_COLOR: Record<Choice, string> = {
   cooperate: "green",
@@ -41,16 +42,20 @@ const GamePlay = () => {
   });
 
   useEffect(() => {
-    if (lastJsonMessage?.type === "game-updated") {
-      const updatedGame: Game = lastJsonMessage.payload.game;
+    const message = lastJsonMessage as ServerMessage | null;
+
+    if (!message) return;
+
+    if (message?.type === "game-updated") {
+      const updatedGame: Game = message.payload.game;
       setGame(updatedGame);
     }
-    if (lastJsonMessage?.type === "player-joined") {
-      const updatedGame: Game = lastJsonMessage.payload.game;
+    if (message?.type === "player-joined") {
+      const updatedGame: Game = message.payload.game;
       setGame(updatedGame);
     }
-    if (lastJsonMessage?.type === "error") {
-      setError(lastJsonMessage.payload.message);
+    if (message?.type === "error") {
+      setError(message.payload.message);
     }
   }, [lastJsonMessage]);
 

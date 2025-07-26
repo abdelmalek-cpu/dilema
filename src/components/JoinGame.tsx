@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useWebSocket from "react-use-websocket";
+import type { ServerMessage } from "../../utilities/messages";
 
 const GAMECODELENGTH = 6;
 const JoinGame = () => {
@@ -34,17 +35,19 @@ const JoinGame = () => {
   };
 
   useEffect(() => {
-    if (!lastJsonMessage) return;
+    const message = lastJsonMessage as ServerMessage | null;
 
-    if (lastJsonMessage.type === "error") {
-      alert(lastJsonMessage.payload.message);
+    if (!message) return;
+
+    if (message.type === "error") {
+      alert(message.payload.message);
     }
 
-    if (lastJsonMessage.type === "player-joined") {
+    if (message.type === "player-joined") {
       navigate("/game", {
         state: {
-          game: lastJsonMessage.payload.game,
-          playerID: lastJsonMessage.payload.playerID,
+          game: message.payload.game,
+          playerID: message.payload.playerID,
         },
       });
     }

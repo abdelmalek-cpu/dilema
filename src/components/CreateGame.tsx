@@ -2,16 +2,10 @@ import { useNavigate } from "react-router-dom";
 import type { Game } from "../../utilities/types";
 import useWebSocket from "react-use-websocket";
 import { useEffect } from "react";
+import type { GameCreatedMessage } from "../../utilities/messages";
 
 const CreateGame = () => {
   const navigate = useNavigate();
-
-  interface GameCreatedMessage {
-    type: string;
-    payload: {
-      gameCode: string;
-    };
-  }
 
   const { sendJsonMessage, lastJsonMessage } = useWebSocket<GameCreatedMessage>(
     "ws://localhost:4001",
@@ -34,10 +28,12 @@ const CreateGame = () => {
         state: {
           game: {
             code: gameCode,
-            players: [{
-              id: 1,
-              score:0
-            }],
+            players: [
+              {
+                id: 1,
+                score: 0,
+              },
+            ],
             currentRound: 1,
             maxRounds: 15,
             history: [],
@@ -46,8 +42,7 @@ const CreateGame = () => {
         },
       });
     }
-  }, [lastJsonMessage, navigate ]);
-
+  }, [lastJsonMessage, navigate]);
 
   return (
     <div>
