@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import type { Game, Choice } from "../../utilities/types";
+import type { Choice, Game } from "../../utilities/types";
+import useWebSocket from "react-use-websocket";
+import { useEffect, useState } from "react";
+import type { ServerMessage } from "../../utilities/messages";
 
 const MOVE_COLOR: Record<Choice, string> = {
   cooperate: "green",
@@ -10,53 +12,62 @@ const MOVE_COLOR: Record<Choice, string> = {
 const GamePlay = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
+  const [error, setError] = useState<string | null>(null);
   const { game: initialGame, playerID } = location.state as {
     game: Game;
     playerID: 1 | 2;
   };
 
   const [game, setGame] = useState<Game>(initialGame);
-  const [error, setError] = useState<string | null>(null);
-  const code = game.code;
+
   const me = game.players.find((p) => p.id === playerID);
   const opponent = game.players.find((p) => p.id !== playerID);
 
-  useEffect(() => {
-    const iv = setInterval(async () => {
-      try {
-        const res = await fetch(
-          `https://dilema-production.up.railway.app/game-state?code=${code}`
-        );
-        const { game: updatedGame } = await res.json();
-        setGame(updatedGame);
-        console.log("Game state updated:", updatedGame);
-      } catch {
-        setError("Failed to fetch game state");
-      }
-    }, 2000);
-
-    return () => clearInterval(iv);
-  }, [code]);
-
-  const handleMove = async (choice: Choice) => {
-    setError(null);
-
-    try {
-      const res = await fetch(`https://dilema-production.up.railway.app/move`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, playerID, choice }),
-      });
-
-      const payload = await res.json();
-      if (!res.ok) {
-        throw new Error(payload.error || "Failed to make move");
-      }
-      setGame(payload.game);
-    } catch {
-      setError("Failed to make move");
+  const { sendJsonMessage, lastJsonMessage } = useWebSocket(
+    "ws://localhost:4001",
+    {
+      share: true,
+      shouldReconnect: () => true,
     }
+  );
+
+  useEffect(() => {
+    sendJsonMessage({
+      type: "identify",
+      payload: {
+        gameCode: game.code,
+        playerID,
+      },
+    });
+  }, [game.code, playerID, sendJsonMessage]);
+
+  useEffect(() => {
+    const message = lastJsonMessage as ServerMessage | null;
+
+    if (!message) return;
+
+    if (message?.type === "game-updated") {
+      const updatedGame: Game = message.payload.game;
+      setGame(updatedGame);
+    }
+    if (message?.type === "player-joined") {
+      const updatedGame: Game = message.payload.game;
+      setGame(updatedGame);
+    }
+    if (message?.type === "error") {
+      setError(message.payload.message);
+    }
+  }, [lastJsonMessage]);
+
+  const handleMove = (move: Choice) => {
+    sendJsonMessage({
+      type: "move",
+      payload: {
+        gameCode: game.code,
+        playerID: playerID,
+        move: move,
+      },
+    });
   };
 
   if (game.currentRound > game.maxRounds) {
@@ -98,12 +109,8 @@ const GamePlay = () => {
     <div style={{ maxWidth: 600, margin: "0 auto" }}>
       <h2>Prisoner's Dilemma</h2>
       <p>
-        <strong>Game Code:</strong> {code} | <strong>Round:</strong>{" "}
+        <strong>Game Code:</strong> {game.code} | <strong>Round:</strong>{" "}
         {game.currentRound}/{game.maxRounds}
-      </p>
-      <p>
-        <strong>Your Score:</strong> {me!.score} |{" "}
-        <strong>Opponent Score: {opponent?.score ?? "-"}</strong>
       </p>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
@@ -121,10 +128,10 @@ const GamePlay = () => {
         </div>
       ) : (
         <p>
-          You chose <strong>{me.lastMove}</strong>. Waiting for your opponent…
+          You choose <strong>{me.lastMove}</strong>. Waiting for your
+          opponent...
         </p>
       )}
-
       <hr />
 
       <div
@@ -145,8 +152,8 @@ const GamePlay = () => {
             marginBottom: 4,
           }}
         >
-          <strong>YOU-</strong>
-          <strong>OPPONENT-</strong>
+          <strong>You-</strong>
+          <strong>Opponent-</strong>
           <strong>Score</strong>
         </div>
 

@@ -1,23 +1,48 @@
 import { useNavigate } from "react-router-dom";
 import type { Game } from "../../utilities/types";
+import useWebSocket from "react-use-websocket";
+import { useEffect } from "react";
+import type { GameCreatedMessage } from "../../utilities/messages";
 
 const CreateGame = () => {
   const navigate = useNavigate();
 
-  const handleCreate = async () => {
-    const response = await fetch(
-      "https://dilema-production.up.railway.app/create-game",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      }
-    );
+  const { sendJsonMessage, lastJsonMessage } = useWebSocket<GameCreatedMessage>(
+    "ws://localhost:4001",
+    {
+      share: true,
+      shouldReconnect: () => true,
+    }
+  );
 
-    const data: { game: Game } = await response.json();
-
-    navigate("/game", { state: { game: data.game, playerID: 1 } });
+  const handleCreate = () => {
+    sendJsonMessage({
+      type: "create-game",
+    });
   };
+
+  useEffect(() => {
+    if (lastJsonMessage?.type === "game-created") {
+      const { gameCode } = lastJsonMessage.payload;
+      navigate("/game", {
+        state: {
+          game: {
+            code: gameCode,
+            players: [
+              {
+                id: 1,
+                score: 0,
+              },
+            ],
+            currentRound: 1,
+            maxRounds: 15,
+            history: [],
+          } as Game,
+          playerID: 1,
+        },
+      });
+    }
+  }, [lastJsonMessage, navigate]);
 
   return (
     <div>

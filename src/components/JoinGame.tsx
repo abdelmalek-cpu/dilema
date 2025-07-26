@@ -1,11 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useWebSocket from "react-use-websocket";
+import type { ServerMessage } from "../../utilities/messages";
 
 const GAMECODELENGTH = 6;
 const JoinGame = () => {
   const navigate = useNavigate();
   const [showInput, setShowInput] = useState(false);
   const [inputCode, setInputCode] = useState("");
+  const { sendJsonMessage, lastJsonMessage } = useWebSocket(
+    "ws://localhost:4001",
+    {
+      share: true,
+      shouldReconnect: () => true,
+    }
+  );
 
   const handleJoin = () => {
     setShowInput(true);
@@ -15,22 +24,34 @@ const JoinGame = () => {
     setInputCode(e.target.value);
   };
 
-  const handleSubmit = async () => {
-    const response = await fetch(
-      `https://dilema-production.up.railway.app/join-game`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: inputCode, playerID: 2 }),
-      }
-    );
-    const data = await response.json();
-    if (data.success) {
-      navigate("/game", { state: { game: data.game, playerID: 2 } });
-    } else {
-      alert(data.error || "Failed to join game");
-    }
+  const handleSubmit = () => {
+    sendJsonMessage({
+      type: "join-game",
+      payload: {
+        gameCode: inputCode,
+        playerID: 2,
+      },
+    });
   };
+
+  useEffect(() => {
+    const message = lastJsonMessage as ServerMessage | null;
+
+    if (!message) return;
+
+    if (message.type === "error") {
+      alert(message.payload.message);
+    }
+
+    if (message.type === "player-joined") {
+      navigate("/game", {
+        state: {
+          game: message.payload.game,
+          playerID: message.payload.playerID,
+        },
+      });
+    }
+  }, [lastJsonMessage, navigate]);
 
   return (
     <div>
