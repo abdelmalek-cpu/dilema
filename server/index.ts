@@ -1,117 +1,235 @@
-import express, { Request, Response } from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import { Game, Choice } from "../utilities/types";
-dotenv.config();
+import http from "http";
+import { WebSocketServer, WebSocket } from "ws";
+import { Choice, Game } from "../utilities/types";
+import payoff from "../utilities/payoff";
 
-const app = express();
-const PORT = process.env.PORT || 4000;
+const server = http.createServer();
+const PORT = process.env.WS_PORT || 4001;
 const MAXROUNDS = 15;
-
-app.use(cors());
-app.use(express.json());
+const wsServer = new WebSocketServer({ server });
 
 const games: Record<string, Game> = {};
+const connections: Map<WebSocket, { gamecode: string; playerID: number }> =
+  new Map();
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Server is running");
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
-app.post("/create-game", (req: Request, res: Response) => {
+const createGame = (): string => {
   const gameCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-  const newGame: Game = {
+  if (games[gameCode]) {
+    return createGame();
+  }
+
+  games[gameCode] = {
     code: gameCode,
-    players: [
-      {
-        id: 1,
-        score: 0,
-      },
-    ],
+    players: [{ id: 1, score: 0 }],
     currentRound: 1,
     maxRounds: MAXROUNDS,
     history: [],
   };
-
-  games[gameCode] = newGame;
-  res.json({ game: newGame });
-});
-
-app.post("/join-game", (req: Request, res: Response) => {
-  const { code, playerID } = req.body as {
-    code: string;
-    playerID: 1 | 2;
-  };
-
-  const game = games[code];
-  if (!game)
-    return res.status(404).json({ success: false, error: "Game not found" });
-  if (game.players.length >= 2)
-    return res.status(400).json({ success: false, error: "Game is full" });
-
-  game.players.push({
-    id: playerID,
-    score: 0,
-  });
-
-  res.json({ success: true, game: game, playerID: playerID });
-});
-
-const payoff = (a: Choice, b: Choice): [number, number] => {
-  if (a === "cooperate" && b === "cooperate") return [3, 3];
-  if (a === "cooperate" && b === "defect") return [0, 5];
-  if (a === "defect" && b === "cooperate") return [5, 0];
-  if (a === "defect" && b === "defect") return [0, 0];
-  return [0, 0];
+  console.log(`Game created with code: ${gameCode}`);
+  return gameCode;
 };
 
-app.post("/move", (req: Request, res: Response) => {
-  const { code, playerID, choice } = req.body as {
-    code: string;
-    playerID: 1 | 2;
-    choice: Choice;
-  };
+wsServer.on("connection", (connection) => {
+  console.log("New client connected");
+  connection.send(
+    JSON.stringify({
+      type: "welcome",
+      message: "Welcome to the game server!",
+    })
+  );
 
-  const game = games[code];
-  if (!game)
-    return res.status(404).json({ success: false, error: "Game not found" });
+  connection.on("message", (message) => {
+    const data = JSON.parse(message.toString());
+    try {
+      switch (data.type) {
+        case "create-game": {
+          const gameCode: string = createGame();
+          connections.set(connection, { gamecode: gameCode, playerID: 1 });
+          connection.send(
+            JSON.stringify({ type: "game-created", payload: { gameCode } })
+          );
 
-  const player = game.players.find((p) => p.id === playerID);
-  if (!player)
-    return res.status(400).json({ success: false, error: "Player not found" });
+          break;
+        }
+        case "join-game": {
+          const { gameCode, playerID } = data.payload;
+          if (!games[gameCode]) {
+            connection.send(
+              JSON.stringify({
+                type: "error",
+                payload: { message: "Game not found" },
+              })
+            );
+            break;
+          }
 
-  if (player.lastMove)
-    return res
-      .status(400)
-      .json({ success: false, error: "You have already moved" });
-  player.lastMove = choice;
+          if (games[gameCode].players.length >= 2) {
+            connection.send(
+              JSON.stringify({
+                type: "error",
+                payload: { message: "Game is full" },
+              })
+            );
+            break;
+          }
 
-  if (game.players.length == 2 && game.players.every((p) => p.lastMove)) {
-    const [p1, p2] = game.players;
-    const [score1, score2] = payoff(p1.lastMove!, p2.lastMove!);
-    p1.score += score1;
-    p2.score += score2;
+          if (
+            games[gameCode].players.some((player) => player.id === playerID)
+          ) {
+            connection.send(
+              JSON.stringify({
+                type: "error",
+                payload: { message: "Player already exists in the game" },
+              })
+            );
+            break;
+          }
 
-    game.history.push({
-      p1: p1.lastMove!,
-      p2: p2.lastMove!,
-      result: [p1.score, p2.score],
-    });
+          games[gameCode].players.push({ id: playerID, score: 0 });
+          connections.set(connection, { gamecode: gameCode, playerID });
+          connection.send(
+            JSON.stringify({
+              type: "player-joined",
+              payload: { game: games[gameCode], playerID },
+            })
+          );
 
-    game.currentRound++;
-    game.players.forEach((p) => delete p.lastMove);
-  }
+          for (const [conn, info] of connections.entries()) {
+            if (conn !== connection && info.gamecode === gameCode) {
+              conn.send(
+                JSON.stringify({
+                  type: "game-updated",
+                  payload: { game: games[gameCode] },
+                })
+              );
+            }
+          }
 
-  res.json({ game });
+          break;
+        }
+
+        case "identify": {
+          const { gameCode, playerID } = data.payload;
+          const game = games[gameCode];
+
+          if (!game) {
+            connection.send(
+              JSON.stringify({
+                type: "error",
+                payload: { message: "Game not found" },
+              })
+            );
+            break;
+          }
+          connections.set(connection, { gamecode: gameCode, playerID });
+          connection.send(
+            JSON.stringify({
+              type: "game-updated",
+              payload: { game },
+            })
+          );
+          break;
+        }
+
+        case "move": {
+          const {
+            gameCode,
+            playerID,
+            move,
+          }: { gameCode: string; playerID: number; move: Choice } =
+            data.payload;
+
+          const game = games[gameCode];
+          const player = game.players.find((p) => p.id === playerID);
+          if (!game) {
+            connection.send(
+              JSON.stringify({
+                type: "error",
+                payload: { message: "Game not found" },
+              })
+            );
+          }
+
+          if (!player) {
+            connection.send(
+              JSON.stringify({
+                type: "error",
+                payload: { message: "Game not found" },
+              })
+            );
+          }
+
+          if (player!.lastMove) {
+            connection.send(
+              JSON.stringify({
+                type: "error",
+                payload: { message: "Player already moved" },
+              })
+            );
+          }
+
+          player!.lastMove = move;
+
+          if (
+            game.players.length == 2 &&
+            game.players.every((p) => p.lastMove!)
+          ) {
+            const [p1, p2] = game.players;
+            const [score1, score2] = payoff(p1.lastMove!, p2.lastMove!);
+            p1.score += score1;
+            p2.score += score2;
+
+            game.history.push({
+              p1: p1.lastMove!,
+              p2: p2.lastMove!,
+              result: [p1.score, p2.score],
+            });
+
+            game.currentRound++;
+
+            game.players.forEach((p) => delete p.lastMove);
+          }
+
+          for (const [conn, info] of connections.entries()) {
+            if (info.gamecode === gameCode) {
+              conn.send(
+                JSON.stringify({
+                  type: "game-updated",
+                  payload: { game: games[gameCode] },
+                })
+              );
+            }
+          }
+
+          break;
+        }
+
+        default: {
+          connection.send(
+            JSON.stringify({
+              type: "error",
+              payload: { message: "Unknown message type" },
+            })
+          );
+          break;
+        }
+      }
+    } catch {
+      console.error("Error processing message: bad request format");
+      connection.send(
+        JSON.stringify({ type: "error", payload: { message: "Bad request" } })
+      );
+      connection.close();
+      connections.delete(connection);
+    }
+  });
+
+  connection.on("close", () => {
+    console.log("Client disconnected");
+    connections.delete(connection);
+  });
 });
 
-app.get("/game-state", (req: Request, res: Response) => {
-  const code = String(req.query.code);
-  const game = games[code];
-  if (!game)
-    return res.status(404).json({ success: false, error: "Game not found" });
-  res.json({ game });
+server.listen(PORT, () => {
+  console.log(`WebSocket server is running on port ${PORT}`);
 });
