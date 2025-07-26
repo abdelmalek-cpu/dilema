@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import type { Game, Choice } from "../utilities/types";
+import { Game, Choice } from "../utilities/types";
 dotenv.config();
 
 const app = express();
