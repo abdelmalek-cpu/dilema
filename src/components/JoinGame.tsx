@@ -9,7 +9,7 @@ const JoinGame = () => {
   const [showInput, setShowInput] = useState(false);
   const [inputCode, setInputCode] = useState("");
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
-    "ws://dilema-production.up.railway.app",
+    "wss://dilema-production.up.railway.app",
     {
       share: true,
       shouldReconnect: () => true,
