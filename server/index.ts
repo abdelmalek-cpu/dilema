@@ -4,7 +4,7 @@ import { Choice, Game } from "../utilities/types";
 import payoff from "../utilities/payoff";
 
 const server = http.createServer();
-const PORT = process.env.WS_PORT || 4001;
+const PORT = process.env.WS_PORT || 4000;
 const MAXROUNDS = 15;
 const wsServer = new WebSocketServer({ server });
 
