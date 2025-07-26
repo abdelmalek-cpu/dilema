@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import { Game, Choice } from "../utilities/types";
 dotenv.config();
 
 const app = express();
@@ -9,26 +10,6 @@ const MAXROUNDS = 15;
 
 app.use(cors());
 app.use(express.json());
-
-type Choice = "cooperate" | "defect";
-
-interface Player {
-  id: 1 | 2;
-  lastMove?: Choice;
-  score: number;
-}
-
-interface Game {
-  code: string;
-  players: Player[];
-  currentRound: number;
-  maxRounds: number;
-  history: {
-    p1: Choice;
-    p2: Choice;
-    result: [number, number];
-  }[];
-}
 
 const games: Record<string, Game> = {};
 
