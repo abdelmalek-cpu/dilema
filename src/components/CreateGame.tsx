@@ -8,7 +8,7 @@ const CreateGame = () => {
   const navigate = useNavigate();
 
   const { sendJsonMessage, lastJsonMessage } = useWebSocket<GameCreatedMessage>(
-    "ws://localhost:4001",
+    "ws://dilema-production.up.railway.app",
     {
       share: true,
       shouldReconnect: () => true,

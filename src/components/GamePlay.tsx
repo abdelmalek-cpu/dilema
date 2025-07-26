@@ -24,7 +24,7 @@ const GamePlay = () => {
   const opponent = game.players.find((p) => p.id !== playerID);
 
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
-    "ws://localhost:4001",
+    "ws://dilema-production.up.railway.app",
     {
       share: true,
       shouldReconnect: () => true,
