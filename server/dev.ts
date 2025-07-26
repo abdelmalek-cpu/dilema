@@ -53,7 +53,6 @@ wsServer.on("connection", (connection) => {
         }
         case "join-game": {
           const { gameCode, playerID } = data.payload;
-          console.log(data.payload);
           if (!games[gameCode]) {
             connection.send(
               JSON.stringify({
@@ -94,7 +93,6 @@ wsServer.on("connection", (connection) => {
               payload: { game: games[gameCode], playerID },
             })
           );
-          console.log(`Player ${playerID} joined game ${gameCode}`);
 
           for (const [conn, info] of connections.entries()) {
             if (conn !== connection && info.gamecode === gameCode) {
@@ -104,7 +102,6 @@ wsServer.on("connection", (connection) => {
                   payload: { game: games[gameCode] },
                 })
               );
-              console.log("Game updated");
             }
           }
 
@@ -113,8 +110,24 @@ wsServer.on("connection", (connection) => {
 
         case "identify": {
           const { gameCode, playerID } = data.payload;
+          const game = games[gameCode];
+
+          if (!game) {
+            connection.send(
+              JSON.stringify({
+                type: "error",
+                payload: { message: "Game not found" },
+              })
+            );
+            break;
+          }
           connections.set(connection, { gamecode: gameCode, playerID });
-          
+          connection.send(
+            JSON.stringify({
+              type: "game-updated",
+              payload: { game },
+            })
+          );
           break;
         }
 
@@ -201,12 +214,11 @@ wsServer.on("connection", (connection) => {
           break;
         }
       }
-    } catch (error) {
+    } catch {
       console.error("Error processing message: bad request format");
       connection.send(
         JSON.stringify({ type: "error", payload: { message: "Bad request" } })
       );
-      console.log(error);
       connection.close();
       connections.delete(connection);
     }
