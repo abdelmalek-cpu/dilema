@@ -1,25 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import type { Game } from '../../utilities/types';
 
-
-type Choice = 'cooperate' | 'defect';
-
-interface Player {
-    id : 1 | 2;
-    lastMove? : Choice
-    score : number;
-};
-
-interface Game {
-    code: string;
-    players: Player[];
-    currentRound: number;
-    maxRounds: number;
-    history: {
-        p1: Choice;
-        p2: Choice;
-        result: [number, number];
-    }[]
-};
 
 const CreateGame = () => {
   const navigate = useNavigate();
@@ -36,7 +17,7 @@ const CreateGame = () => {
 
     navigate('/game', { state: { game: data.game , playerID: 1} });
   };
-
+  
   return (
     <div>
       <button onClick={handleCreate}>Create</button>

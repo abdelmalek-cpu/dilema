@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const GAMECODELENGTH = 6;
 const JoinGame = () => {
@@ -11,39 +11,36 @@ const JoinGame = () => {
     setShowInput(true);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>
-) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputCode(e.target.value);
   };
 
   const handleSubmit = async () => {
     const response = await fetch(`http://localhost:4000/join-game`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: inputCode, playerID: 2 })
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: inputCode, playerID: 2 }),
     });
     const data = await response.json();
     if (data.success) {
-      navigate('/game', { state: { game: data.game, playerID: 2 } });
+      navigate("/game", { state: { game: data.game, playerID: 2 } });
     } else {
-      alert(data.error || 'Failed to join game');
+      alert(data.error || "Failed to join game");
     }
   };
 
   return (
     <div>
-      {!showInput && (
-        <button onClick={handleJoin}>Join</button>
-      )}
+      {!showInput && <button onClick={handleJoin}>Join</button>}
       {showInput && (
-        <div style={{ marginTop: '1rem' }}>
+        <div style={{ marginTop: "1rem" }}>
           <input
-            type='text'
+            type="text"
             value={inputCode}
             onChange={handleInputChange}
-            placeholder='Enter game code...'
+            placeholder="Enter game code..."
             maxLength={GAMECODELENGTH}
-            style={{ marginRight: '0.5rem' }}
+            style={{ marginRight: "0.5rem" }}
           />
           <button onClick={handleSubmit}>Submit</button>
         </div>
