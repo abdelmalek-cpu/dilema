@@ -27,15 +27,13 @@ const createGame = (): string => {
 };
 
 wsServer.on("connection", (connection) => {
-  connection.on("connection", (connection) => {
-    console.log("New client connected");
-    connection.send(
-      JSON.stringify({
-        type: "welcome",
-        message: "Welcome to the game server!",
-      })
-    );
-  });
+  console.log("New client connected");
+  connection.send(
+    JSON.stringify({
+      type: "welcome",
+      message: "Welcome to the game server!",
+    })
+  );
 
   connection.on("message", (message) => {
     const data = JSON.parse(message.toString());

@@ -1,29 +1,43 @@
-import { useNavigate } from 'react-router-dom';
-import type { Game } from '../../utilities/types';
-import useWebSocket from 'react-use-websocket';
+import { useNavigate } from "react-router-dom";
+import type { Game } from "../../utilities/types";
+import useWebSocket from "react-use-websocket";
 
 const CreateGame = () => {
   const navigate = useNavigate();
-  const { sendMessage } = useWebSocket('ws://localhost:4001');
-  
-  // we use websocket to communicate with the server instead of fetch 
+  const WS_URL: string = process.env.WS_URL || "ws://localhost:4001";
 
-  const handleCreate = async () => {
-    sendMessage(JSON.stringify({ type: 'create-game' }));
-  };
-  useWebSocket('ws://localhost:4001', {
+  const { sendJsonMessage } = useWebSocket(WS_URL, {
     onMessage: (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'game-created') {
-        const gameCode: string = data.payload.gameCode;
-        console.log(`Game created with code: ${gameCode}`);
-        navigate(`/game/${gameCode}`);
-      } else if (data.type === 'error') {
-        console.error(data.payload.message);
+      try {
+        const data = JSON.parse(event.data) as {
+          type: string;
+          payload: { gameCode: string };
+        };
+        if (data.type === "game-created") {
+          const { gameCode } = data.payload;
+          navigate("/game", {
+            state: {
+              game: {
+                code: gameCode,
+                players: [],
+                currentRound: 1,
+                maxRounds: 15,
+                history: [],
+              } as Game,
+              playerID: 1,
+            },
+          });
+        }
+      } catch {
+        console.error("Failed to parse message:", event.data);
       }
     },
   });
-  
+
+  const handleCreate = () => {
+    sendJsonMessage({ type: "create-game" });
+  };
+
   return (
     <div>
       <button onClick={handleCreate}>Create</button>
