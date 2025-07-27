@@ -104,6 +104,8 @@ const GamePlay = () => {
   }
 
   const hasMoved = me?.lastMove !== undefined;
+  const playersJoined = game.players.length;
+  const bothPlayersJoined = playersJoined === 2;
 
   return (
     <div style={{ maxWidth: 600, margin: "0 auto" }}>
@@ -112,19 +114,29 @@ const GamePlay = () => {
         <strong>Game Code:</strong> {game.code} | <strong>Round:</strong>{" "}
         {game.currentRound}/{game.maxRounds}
       </p>
+      <p>
+        <strong>Players:</strong> {playersJoined}/2
+      </p>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {!hasMoved ? (
+      {!bothPlayersJoined ? (
+        <div>
+          <p style={{ color: "#888" }}>Please wait for the second player to join...</p>
+        </div>
+      ) : !hasMoved ? (
         <div>
           <p>Choose your move:</p>
           <button
             onClick={() => handleMove("cooperate")}
             style={{ marginRight: 8 }}
+            disabled={!bothPlayersJoined}
           >
             Cooperate 🤝
           </button>
-          <button onClick={() => handleMove("defect")}>Defect 😈</button>
+          <button onClick={() => handleMove("defect")}
+            disabled={!bothPlayersJoined}
+          >Defect 😈</button>
         </div>
       ) : (
         <p>
