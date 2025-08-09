@@ -12,7 +12,7 @@ const games: Record<string, Game> = {};
 const connections: Map<WebSocket, { gamecode: string; playerID: number }> =
   new Map();
 
-const createGame = (): string => {
+const createGame = (): Game => {
   const gameCode = Math.random().toString(36).substring(2, 8).toUpperCase();
   if (games[gameCode]) {
     return createGame();
@@ -26,7 +26,7 @@ const createGame = (): string => {
     history: [],
   };
   console.log(`Game created with code: ${gameCode}`);
-  return gameCode;
+  return games[gameCode];
 };
 
 wsServer.on("connection", (connection) => {
@@ -43,10 +43,10 @@ wsServer.on("connection", (connection) => {
     try {
       switch (data.type) {
         case "create-game": {
-          const gameCode: string = createGame();
-          connections.set(connection, { gamecode: gameCode, playerID: 1 });
+          const game: Game = createGame();
+          connections.set(connection, { gamecode: game.code, playerID: 1 });
           connection.send(
-            JSON.stringify({ type: "game-created", payload: { gameCode } })
+            JSON.stringify({ type: "game-created", payload: { game: game } })
           );
 
           break;

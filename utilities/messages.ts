@@ -3,7 +3,7 @@ import type { Game } from "./types";
 export interface GameCreatedMessage {
   type: string;
   payload: {
-    gameCode: string;
+    game: Game;
   };
 }
 

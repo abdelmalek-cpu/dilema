@@ -23,21 +23,10 @@ const CreateGame = () => {
 
   useEffect(() => {
     if (lastJsonMessage?.type === "game-created") {
-      const { gameCode } = lastJsonMessage.payload;
+      const { game } = lastJsonMessage.payload;
       navigate("/game", {
         state: {
-          game: {
-            code: gameCode,
-            players: [
-              {
-                id: 1,
-                score: 0,
-              },
-            ],
-            currentRound: 1,
-            maxRounds: 15,
-            history: [],
-          } as Game,
+          game: game as Game,
           playerID: 1,
         },
       });
