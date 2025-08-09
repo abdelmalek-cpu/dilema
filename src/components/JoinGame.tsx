@@ -4,12 +4,14 @@ import useWebSocket from "react-use-websocket";
 import type { ServerMessage } from "../../utilities/messages";
 
 const GAMECODELENGTH = 6;
+const BACKEND_URL = import.meta.env.VITE_WS_URL;
+
 const JoinGame = () => {
   const navigate = useNavigate();
   const [showInput, setShowInput] = useState(false);
   const [inputCode, setInputCode] = useState("");
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
-    "wss://dilema-production.up.railway.app",
+    BACKEND_URL,
     {
       share: true,
       shouldReconnect: () => true,

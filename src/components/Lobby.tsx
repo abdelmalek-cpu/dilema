@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 import useWebSocket from "react-use-websocket";
 import type { GameCreatedMessage } from "../../utilities/messages";
 
+const BACKEND_URL = import.meta.env.VITE_WS_URL;
+
 const Lobby = () => {
   const navigate = useNavigate();
   const [inputNumber, setInputNumber] = useState(1);
 
   const { sendJsonMessage, lastJsonMessage } = useWebSocket<GameCreatedMessage>(
-    "wss://dilema-production.up.railway.app",
+    BACKEND_URL,
     {
       share: true,
       shouldReconnect: () => true,

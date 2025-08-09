@@ -4,6 +4,8 @@ import useWebSocket from "react-use-websocket";
 import { useEffect, useState } from "react";
 import type { ServerMessage } from "../../utilities/messages";
 
+const BACKEND_URL = import.meta.env.VITE_WS_URL;
+
 const MOVE_COLOR: Record<Choice, string> = {
   cooperate: "green",
   defect: "red",
@@ -24,7 +26,7 @@ const GamePlay = () => {
   const opponent = game.players.find((p) => p.id !== playerID);
 
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
-    "wss://dilema-production.up.railway.app",
+    BACKEND_URL,
     {
       share: true,
       shouldReconnect: () => true,
