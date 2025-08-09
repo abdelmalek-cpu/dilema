@@ -1,69 +1,128 @@
-# React + TypeScript + Vite
+# Prisoner's Dilemma Game
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A real-time multiplayer implementation of the classic Prisoner's Dilemma game theory concept, built with WebSockets for instant communication between players.
 
-Currently, two official plugins are available:
+## 🎮 Game Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The Prisoner's Dilemma is a fundamental game theory scenario where two players must choose to either "cooperate" or "defect" without knowing the other player's choice. The payoff matrix creates strategic tension between individual and collective interests.
 
-## Expanding the ESLint configuration
+### Payoff Matrix
+- **Both Cooperate**: 3 points each
+- **Both Defect**: 0 points each  
+- **One Cooperates, One Defects**: Defector gets 5 points, Cooperator gets 0 points
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠 Tech Stack
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Backend
+- **Node.js** with TypeScript
+- **WebSocket Server** (`ws` library)
+- **Express.js** (dependencies suggest future REST API support)
+- **HTTP Server** for WebSocket upgrade handling
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### Frontend
+- **React 18** with TypeScript
+- **React Router** for navigation
+- **Vite** for development and building
+- **CSS3** for styling
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 📦 Installation
+
+### Prerequisites
+- Node.js (v14 or higher)
+- npm or yarn
+
+### Backend Setup
+```bash
+cd server
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Frontend Setup
+```bash
+cd src
+npm install
 ```
+
+## 🏃‍♂️ Running the Application
+
+### Development Mode
+
+1. **Start the WebSocket Server**:
+```bash
+cd server
+npm run dev
+```
+The server will start on port 4000 (or `WS_PORT` environment variable).
+
+2. **Start the React Frontend**:
+```bash
+cd src
+npm run dev
+```
+The frontend will be available at `http://localhost:5173`.
+
+### Production Build
+
+1. **Build the Frontend**:
+```bash
+cd src
+npm run build
+```
+
+2. **Build the Backend**:
+```bash
+cd server
+npm run build
+```
+
+## 🎯 How to Play
+
+1. **Create a Game**: 
+   - Click "Create" on the home page
+   - Choose the number of rounds (1-100)
+   - Share the generated game code with another player
+
+2. **Join a Game**:
+   - Click "Join" on the home page
+   - Enter the 6-character game code
+   - Wait for the game creator to start
+
+3. **Make Your Moves**:
+   - Each round, choose either "Cooperate 🤝" or "Defect 😈"
+   - Points are awarded based on the payoff matrix
+   - View your move history in the sidebar
+
+4. **Game End**:
+   - After all rounds are completed, see the final scores
+   - The player with the highest total score wins
+
+## 🏗 Project Structure
+
+```
+├── server/
+│   ├── index.ts              # WebSocket server entry point
+│   ├── utilities/
+│   │   ├── types.ts          # TypeScript type definitions
+│   │   ├── payoff.ts         # Payoff matrix logic
+│   │   └── messages.ts       # WebSocket message types
+│   ├── package.json
+│   └── tsconfig.json
+├── src/
+│   ├── components/
+│   │   ├── CreateGame.tsx    # Game creation component
+│   │   ├── JoinGame.tsx      # Game joining component
+│   │   ├── Lobby.tsx         # Game setup lobby
+│   │   └── GamePlay.tsx      # Main game interface
+│   ├── App.tsx               # Main app component
+│   ├── main.tsx             # React entry point
+│   └── index.css            # Global styles
+└── README.md
+```
+
+## 📚 Game Theory Resources
+
+To learn more about the Prisoner's Dilemma:
+- [Stanford Encyclopedia of Philosophy - Prisoner's Dilemma](https://plato.stanford.edu/entries/prisoner-dilemma/)
+- [The Evolution of Cooperation by Robert Axelrod](https://en.wikipedia.org/wiki/The_Evolution_of_Cooperation)
+
+---
