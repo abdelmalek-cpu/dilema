@@ -5,24 +5,23 @@ import payoff from "./utilities/payoff";
 
 const server = http.createServer();
 const PORT = process.env.WS_PORT || 4000;
-const MAXROUNDS = 15;
 const wsServer = new WebSocketServer({ server });
 
 const games: Record<string, Game> = {};
 const connections: Map<WebSocket, { gamecode: string; playerID: number }> =
   new Map();
 
-const createGame = (): Game => {
+const createGame = (rounds: number): Game => {
   const gameCode = Math.random().toString(36).substring(2, 8).toUpperCase();
   if (games[gameCode]) {
-    return createGame();
+    return createGame(rounds);
   }
 
   games[gameCode] = {
     code: gameCode,
     players: [{ id: 1, score: 0 }],
     currentRound: 1,
-    maxRounds: MAXROUNDS,
+    maxRounds: rounds || 10,
     history: [],
   };
   console.log(`Game created with code: ${gameCode}`);
@@ -43,7 +42,7 @@ wsServer.on("connection", (connection) => {
     try {
       switch (data.type) {
         case "create-game": {
-          const game: Game = createGame();
+          const game: Game = createGame(data.payload.rounds);
           connections.set(connection, { gamecode: game.code, playerID: 1 });
           connection.send(
             JSON.stringify({ type: "game-created", payload: { game: game } })

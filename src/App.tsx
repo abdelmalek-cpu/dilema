@@ -3,6 +3,7 @@ import "./App.css";
 import CreateGame from "./components/CreateGame";
 import JoinGame from "./components/JoinGame";
 import GamePlay from "./components/GamePlay";
+import Lobby from "./components/Lobby";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             </>
           }
         />
+        <Route path="/lobby" element={<Lobby />} />
         <Route path="/game" element={<GamePlay />} />
       </Routes>
     </BrowserRouter>
