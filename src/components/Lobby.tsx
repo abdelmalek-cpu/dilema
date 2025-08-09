@@ -8,7 +8,7 @@ const Lobby = () => {
   const [inputNumber, setInputNumber] = useState(1);
 
   const { sendJsonMessage, lastJsonMessage } = useWebSocket<GameCreatedMessage>(
-    "ws://localhost:4001",
+    "wss://dilema-production.up.railway.app",
     {
       share: true,
       shouldReconnect: () => true,
